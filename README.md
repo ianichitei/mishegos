@@ -46,11 +46,13 @@ Run the fuzzer for a bit:
 * `V=1` enables verbose output on `stderr`
 * `D=1` enables the "dummy" mutation mode for debugging purposes
 * `M=1` enables the "manual" mutation mode (i.e., read from `stdin`)
+* `MODE=mode` can be used to configure the mutation mode in the absence of `D` and `M`
+    * Valid mutation modes are `sliding` (default), `havoc`, and `structured`
 
 Convert mishegos's raw output into JSONL suitable for analysis:
 
 ```bash
-./src/mish2jsonl < /tmp/mishegos > /tmp/mishegos.jsonl
+./src/mish2jsonl/mish2jsonl /tmp/mishegos > /tmp/mishegos.jsonl
 ```
 
 `mish2jsonl` checks for `V=1` to enable verbose output on `stderr`.
@@ -82,14 +84,13 @@ All numbers below correspond to the following run:
 V=1 timeout 60s ./src/mishegos/mishegos ./workers.spec > /tmp/mishegos
 ```
 
-Within Docker:
+Outside Docker:
 
-* On a Linux server (40 cores, 128GB RAM):
-    * 3.5M outputs/minute
-    * 5 cores pinned
-* On a 2018 Macbook Pro (2+2 cores, 16GB RAM):
-    * 300K outputs/minute
-    * (All) 4 cores pinned
+* On a Linux desktop (Ubuntu 20.04, Ryzen 5 3600, 32GB DDR4):
+    * Commit [`d80063a`](https://github.com/trailofbits/mishegos/commit/d80063a575c4b10d5f787ac88f45d44c8e7f9937)
+    * 8 workers (no `udis86`) + 1 `mishegos` fuzzer process
+    * 8.7M outputs/minute
+    * 9 cores pinned
 
 ## TODO
 

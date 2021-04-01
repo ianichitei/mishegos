@@ -34,7 +34,6 @@
 #include <dlfcn.h>
 #include <sys/wait.h>
 #include <setjmp.h>
-#include <sys/random.h>
 #include <time.h>
 
 #define VERBOSE(fmt, ...)                                                                          \
@@ -93,15 +92,14 @@ typedef enum {
   S_SUCCESS,
   S_FAILURE,
   S_CRASH,
-  S_HANG,
   S_PARTIAL,
-  S_WOULDBLOCK,
   S_UNKNOWN,
 } decode_status;
 
 typedef enum {
   M_HAVOC = 0,
   M_SLIDING,
+  M_STRUCTURED,
   M_DUMMY,
   M_MANUAL,
 } mutator_mode;
@@ -163,12 +161,8 @@ static inline const char *status2str(decode_status status) {
     return "failure";
   case S_CRASH:
     return "crash";
-  case S_HANG:
-    return "hang";
   case S_PARTIAL:
     return "partial";
-  case S_WOULDBLOCK:
-    return "wouldblock";
   case S_UNKNOWN:
   default:
     return "unknown";

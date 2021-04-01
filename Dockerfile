@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
-RUN apt-get update && \
-    apt-get install -y \
+RUN apt-get update
+RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
         build-essential \
         binutils-dev \
         python \
@@ -13,22 +13,18 @@ RUN apt-get update && \
         autoconf \
         libtool \
         git \
-        gnupg2 \
-        default-jre \
-        python3-pip && \
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 379CE192D401AB61 && \
-    echo "deb https://dl.bintray.com/kaitai-io/debian jessie main" \
-        | tee /etc/apt/sources.list.d/kaitai.list && \
-    apt-get update && \
-    apt-get install -y \
-        kaitai-struct-compiler && \
-    pip3 install kaitaistruct
+        curl \
+        llvm-dev \
+        libclang-dev \
+        clang
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 WORKDIR /app/mishegos
 COPY ./ .
 
 ARG TARGET=all
-ARG BUILD_JOBS=4
-RUN make "${TARGET}" -j"${BUILD_JOBS}"
+RUN make "${TARGET}" -j
 
 CMD ["/bin/bash"]

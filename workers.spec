@@ -6,3 +6,5 @@
 ./src/worker/xed/xed.so
 ./src/worker/zydis/zydis.so
 ./src/worker/bddisasm/bddisasm.so
+./src/worker/iced/iced.so
+./src/worker/yaxpeax-x86/libyaxpeax_x86_mishegos.so

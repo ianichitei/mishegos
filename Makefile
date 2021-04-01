@@ -1,10 +1,13 @@
 export CFLAGS := \
-	-std=gnu11 -Wall -Werror -pthread \
+	-std=gnu11 -Wall -pthread \
 	-I$(shell pwd)/src/include
 export LDLIBS := -ldl -lrt -lpthread
 export CPPFLAGS :=
 export CXXFLAGS := \
-	-std=c++11 -Wall -Werror -pthread \
+	-std=c++11 -Wall -pthread \
+	-I$(shell pwd)/src/include
+export RUSTFLAGS := -D warnings
+export RUST_BINDGEN_CLANG_ARGS := \
 	-I$(shell pwd)/src/include
 
 ALL_SRCS := $(shell \
@@ -18,7 +21,7 @@ ALL_SRCS := $(shell \
 		-path '*/udis86/udis86/*' -o \
 		-path '*/xed/xed/*' -o \
 		-path '*/xed/mbuild/*' -o \
-		-path '*/zydis/zydis/*' \
+		-path '*/zydis/zydis/*' -o \
 		-path '*/bddisasm/bddisasm/*' \
 	\) \
 	-prune \
@@ -43,7 +46,7 @@ worker:
 
 .PHONY: mish2jsonl
 mish2jsonl:
-	$(MAKE) -C src/mish2jsonl
+	$(MAKE) -C  src/mish2jsonl
 
 .PHONY: fmt
 fmt:
@@ -61,6 +64,7 @@ edit:
 clean:
 	$(MAKE) -C src/worker clean
 	$(MAKE) -C src/mishegos clean
+	$(MAKE) -C src/mish2jsonl clean
 
 .PHONY: update-submodules
 update-submodules:

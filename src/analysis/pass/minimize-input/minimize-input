@@ -5,17 +5,26 @@
 
 require "json"
 
-STDERR.puts "[+] pass: minimize-input"
+warn "[+] pass: minimize-input"
 
-STDIN.each_line do |line|
+count = 0
+$stdin.each_line do |line|
   result = JSON.parse line, symbolize_names: true
 
   max_ndecoded = result[:outputs].map { |o| o[:ndecoded] }.max
 
+  # If the maximum ndecoded is 0, then all are 0 and we should skip
+  # this cohort entirely.
+  # In effect, this is probably identical to filter-all-failure.
+  if max_ndecoded.zero?
+    count += 1
+    next
+  end
+
   # input is hex formatted, so the trimmed length is max_ndecoded * 2
   result[:input] = result[:input][0, max_ndecoded * 2]
 
-  STDOUT.puts result.to_json
+  $stdout.puts result.to_json
 end
 
-STDERR.puts "[+] pass: minimize-input done"
+warn "[+] pass: minimize-input done: #{count} filtered"

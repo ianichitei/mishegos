@@ -118,6 +118,10 @@ static void load_worker_spec(char const *spec) {
       continue;
     }
 
+    if (access(workers[nworkers].so, R_OK) < 0) {
+      err(errno, "access (read): %s", workers[nworkers].so);
+    }
+
     DLOG("got worker %d so: %s", nworkers, workers[nworkers].so);
     nworkers++;
   }
@@ -177,10 +181,29 @@ static void mishegos_sem_init() {
   }
 }
 
+static mutator_mode get_mut_mode() {
+  const char *mode = getenv("MODE");
+
+  /* default to the "sliding" strategy in the mutator. */
+  if (mode == NULL) {
+    return M_SLIDING;
+  }
+
+  if (strcmp(mode, "sliding") == 0) {
+    return M_SLIDING;
+  } else if (strcmp(mode, "havoc") == 0) {
+    return M_HAVOC;
+  } else if (strcmp(mode, "structured") == 0) {
+    return M_STRUCTURED;
+  }
+
+  errx(1, "unknown mutator mode requested: %s", mode);
+}
+
 static void config_init() {
   /* TODO(ww): Configurable RNG seed.
    */
-  getrandom(GET_CONFIG()->rng_seed, sizeof(GET_CONFIG()->rng_seed), 0);
+  mish_getrandom(GET_CONFIG()->rng_seed, sizeof(GET_CONFIG()->rng_seed), 0);
 
   if (getenv("FAST_AND_FURIOUS") != NULL) {
     GET_CONFIG()->worker_config |= 1 << W_IGNORE_CRASHES;
@@ -191,7 +214,10 @@ static void config_init() {
   } else if (debugging) {
     GET_CONFIG()->mut_mode = M_DUMMY;
   } else {
-    GET_CONFIG()->mut_mode = M_SLIDING;
+    /* If we're not in a manual or debugging mode, try to figure out what
+     * actual fuzzing mode the user wants from us.
+     */
+    GET_CONFIG()->mut_mode = get_mut_mode();
   }
 }
 
@@ -211,7 +237,6 @@ static void arena_init() {
        * a slot.
        */
       slot->workers = ~(~0 << nworkers);
-      candidate(slot);
       DLOG("slot=%d new candidate:", i);
       hexputs(slot->raw_insn, slot->len);
     }
